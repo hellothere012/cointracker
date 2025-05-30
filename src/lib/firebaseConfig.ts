@@ -4,13 +4,13 @@ import { getAuth } from "firebase/auth";
 
 // TODO: Add your own Firebase configuration below
 const firebaseConfig = {
-  apiKey: "YOUR_API_KEY",
-  authDomain: "YOUR_AUTH_DOMAIN",
-  projectId: "YOUR_PROJECT_ID",
-  storageBucket: "YOUR_STORAGE_BUCKET",
-  messagingSenderId: "YOUR_MESSAGING_SENDER_ID",
-  appId: "YOUR_APP_ID"
-};
+  apiKey: "AIzaSyDts10GlTmzayc3V7Lmwr9qYrIi8roKE48",
+  authDomain: "gold-and-silver-coin-tracker.firebaseapp.com",
+  projectId: "gold-and-silver-coin-tracker",
+  storageBucket: "gold-and-silver-coin-tracker.firebasestorage.app",
+  messagingSenderId: "240219499856",
+  appId: "1:240219499856:web:c416182c15ea9aeccad055"
+  };
 
 // Initialize Firebase
 let app;

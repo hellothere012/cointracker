@@ -38,6 +38,11 @@ export default function Navbar() {
               <li>
                 <Link href="/inventory" className="hover:text-gray-300">Inventory</Link>
               </li>
+              {currentUser && currentUser.isAdmin && ( // Conditional Admin link
+                <li>
+                  <Link href="/admin" className="text-yellow-400 hover:text-yellow-300">Admin</Link>
+                </li>
+              )}
               <li>
                 <button
                   onClick={handleLogout}
