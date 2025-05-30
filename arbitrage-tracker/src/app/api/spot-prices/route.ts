@@ -82,7 +82,7 @@ export async function GET() {
             { status: 500 }
         );
     }
-    
+
     // Convert ISO timestamp to Unix timestamp (seconds)
     const unixTimestamp = Math.floor(new Date(data.timestamp).getTime() / 1000);
 
@@ -101,12 +101,15 @@ export async function GET() {
 
     return NextResponse.json({ ...freshSpotPrices, lastFetched: Math.floor(lastFetchTimestamp / 1000) });
 
-  } catch (error: any) {
-    console.error('Error in spot prices API route:', error);
-    // Do not update cache with error, serve stale if available and within a grace period?
-    // For now, just returns error. If needed, could return stale cache + error message.
+  } catch (error: unknown) {
+    let errorMessage = 'An unexpected error occurred while fetching spot prices.';
+    if (error instanceof Error) {
+      errorMessage = error.message;
+    }
+    console.error('Error in spot prices API route:', error); // Log the original error object for more details server-side
+    // Do not update cache with error
     return NextResponse.json(
-      { error: 'An unexpected error occurred while fetching spot prices.', details: error.message },
+      { error: 'An unexpected error occurred while fetching spot prices.', details: errorMessage },
       { status: 500 }
     );
   }

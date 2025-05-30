@@ -1,4 +1,4 @@
-'use client'; 
+'use client';
 
 import React, { useEffect, useState } from 'react';
 import withAdminAuth from '../../components/withAdminAuth';
@@ -44,7 +44,7 @@ function AdminPage() {
         <h1 className="text-3xl font-bold text-gray-800 mb-2">Admin Panel</h1>
         <p className="text-gray-600">Manage Arbitrage Coin Opportunities</p>
       </div>
-      
+
       <section>
         <AddArbitrageCoinForm />
       </section>
@@ -53,7 +53,7 @@ function AdminPage() {
         <h2 className="text-2xl font-semibold text-gray-700 mb-6 border-t pt-8">Published Arbitrage Coins</h2>
         {loading && <p className="text-gray-500">Loading arbitrage coins...</p>}
         {error && <p className="text-red-500 bg-red-100 p-3 rounded-md">Error loading arbitrage coins: {error}</p>}
-        
+
         {!loading && !error && arbitrageCoins.length === 0 && (
           <p className="text-gray-500">No arbitrage coins published yet.</p>
         )}
@@ -65,12 +65,12 @@ function AdminPage() {
                 <div className="flex flex-col md:flex-row gap-6">
                   {coin.imageUrl && (
                     <div className="md:w-1/4 flex-shrink-0">
-                      <Image 
-                        src={coin.imageUrl} 
-                        alt={coin.name} 
-                        width={150} 
-                        height={150} 
-                        className="rounded-md object-cover aspect-square" 
+                      <Image
+                        src={coin.imageUrl}
+                        alt={coin.name}
+                        width={150}
+                        height={150}
+                        className="rounded-md object-cover aspect-square"
                         onError={(e) => (e.currentTarget.style.display = 'none')} // Hide if image fails to load
                       />
                     </div>
@@ -81,7 +81,7 @@ function AdminPage() {
                       {coin.metalType}
                     </p>
                     <p className="text-gray-700 mb-3 whitespace-pre-wrap">{coin.description}</p>
-                    
+
                     {coin.notes && (
                       <div className="mt-3 mb-3 p-3 bg-yellow-50 border border-yellow-200 rounded-md">
                         <h5 className="font-semibold text-sm text-yellow-800">Admin Notes:</h5>
@@ -95,7 +95,7 @@ function AdminPage() {
                         {coin.resaleLinks.map((link, index) => (
                           <li key={index} className="text-sm">
                             <span className="font-medium">{link.platform}:</span>{' '}
-                            <a href={link.url} target="_blank" rel="noopener noreferrer" 
+                            <a href={link.url} target="_blank" rel="noopener noreferrer"
                                className="text-blue-500 hover:text-blue-700 hover:underline break-all">
                               {link.url}
                             </a>

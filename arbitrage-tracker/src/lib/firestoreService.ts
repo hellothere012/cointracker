@@ -125,9 +125,14 @@ export const batchAddPreloadedCoins = async (coinsData: PreloadedCoinData[]): Pr
     try {
       await batch.commit();
       console.log(`${operationsCount} new preloaded coins added successfully.`);
-    } catch (error) {
-      console.error('Error batch adding preloaded coins: ', error);
-      throw error;
+    } catch (error: unknown) {
+      if (error instanceof Error) {
+        console.error('Error batch adding preloaded coins: ', error.message);
+        throw new Error(error.message); // Re-throw with message
+      } else {
+        console.error('Unknown error batch adding preloaded coins: ', error);
+        throw new Error('An unknown error occurred during batch preloaded coin add.');
+      }
     }
   } else {
     console.log('No new preloaded coins to add.');
