@@ -73,10 +73,10 @@ export default function CoinTable({ onEditCoin, spotPrices, spotPricesLoading }:
         </thead>
         <tbody className="bg-white divide-y divide-gray-200">
           {coins.map((coin) => (
-            <CoinRow 
-              key={coin.id} 
-              coin={coin} 
-              onEdit={onEditCoin} 
+            <CoinRow
+              key={coin.id}
+              coin={coin}
+              onEdit={onEditCoin}
               spotPrices={spotPrices}
               spotPricesLoading={spotPricesLoading}
             />

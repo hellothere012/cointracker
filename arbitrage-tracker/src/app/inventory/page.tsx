@@ -11,10 +11,10 @@ import { Coin } from '../../types/inventory';
 import { PreloadedCoinData } from '../../types/preloadedCoin'; // Import PreloadedCoinData
 import { batchAddPreloadedCoins } from '../../lib/firestoreService'; // Import batch function
 
-import { 
-  calculateMeltValue, 
-  calculatePremiumPaidPercent, 
-  calculateProfitMarginPercent 
+import {
+  calculateMeltValue,
+  calculatePremiumPaidPercent,
+  calculateProfitMarginPercent
 } from '../../lib/calculations'; // Import calculation functions
 
 // Sample data for preloading
@@ -123,7 +123,7 @@ function InventoryPage() {
       setCoinsLoading(false);
     }
   }, [currentUser]);
-  
+
   useEffect(() => {
     const fetchPrices = async () => {
       setSpotPricesLoading(true);
@@ -140,8 +140,12 @@ function InventoryPage() {
           XAGUSD: data.XAGUSD,
           XPTUSD: data.XPTUSD,
         });
-      } catch (err: any) {
-        setSpotPricesError(err.message);
+      } catch (err: unknown) {
+        if (err instanceof Error) {
+          setSpotPricesError(err.message);
+        } else {
+          setSpotPricesError('An unexpected error occurred while fetching spot prices.');
+        }
         console.error("Failed to fetch spot prices:", err);
       } finally {
         setSpotPricesLoading(false);
@@ -177,7 +181,7 @@ function InventoryPage() {
     }
     return ''; // Fallback for unexpected format
   };
-  
+
   const escapeCSVField = (field: any): string => {
     if (field === null || field === undefined) return ''; // Return empty string for null/undefined
     const stringField = String(field);
@@ -266,9 +270,13 @@ function InventoryPage() {
             try {
               await batchAddPreloadedCoins(samplePreloadedCoins);
               setPopulateMessage("Preloaded coins processed. Check console for details.");
-            } catch (error: any) {
+            } catch (error: unknown) {
               console.error("Failed to populate preloaded coins:", error);
-              setPopulateMessage(`Error: ${error.message || 'Failed to populate.'}`);
+              if (error instanceof Error) {
+                setPopulateMessage(`Error: ${error.message}`);
+              } else {
+                setPopulateMessage('An unexpected error occurred during population.');
+              }
             } finally {
               setIsPopulating(false);
             }
@@ -280,7 +288,7 @@ function InventoryPage() {
         </button>
         {populateMessage && <p className={`mt-2 text-sm ${populateMessage.startsWith('Error') ? 'text-red-600' : 'text-green-600'}`}>{populateMessage}</p>}
       </div>
-      
+
       <div className="mb-12">
         <AddCoinForm />
       </div>
@@ -289,11 +297,11 @@ function InventoryPage() {
         <h2 className="text-2xl font-semibold text-gray-700 mb-4">Your Collection</h2>
         {spotPricesLoading && <p className="text-center text-gray-600 py-4">Loading spot prices...</p>}
         {spotPricesError && <p className="text-center text-red-500 py-4 bg-red-100 p-3 rounded-md">Error loading spot prices: {spotPricesError}</p>}
-        <CoinTable 
-          key={refreshKey} 
-          onEditCoin={handleEditCoin} 
-          spotPrices={spotPrices} 
-          spotPricesLoading={spotPricesLoading} 
+        <CoinTable
+          key={refreshKey}
+          onEditCoin={handleEditCoin}
+          spotPrices={spotPrices}
+          spotPricesLoading={spotPricesLoading}
         />
         {coinsError && <p className="text-sm text-red-600 mt-2">Error loading coins: {coinsError}</p>}
       </div>

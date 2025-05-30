@@ -34,7 +34,7 @@ export default function AddArbitrageCoinForm() {
   };
 
   const handleLinkChange = (index: number, field: keyof ArbitrageCoinLink, value: string) => {
-    const updatedLinks = formData.resaleLinks.map((link, i) => 
+    const updatedLinks = formData.resaleLinks.map((link, i) =>
       i === index ? { ...link, [field]: value } : link
     );
     setFormData(prev => ({ ...prev, resaleLinks: updatedLinks }));
@@ -72,14 +72,18 @@ export default function AddArbitrageCoinForm() {
       // Prepare data for Firestore (remove tempId from links)
       const dataToSubmit: Omit<ArbitrageCoin, 'id' | 'publishedAt'> = {
         ...formData,
-        resaleLinks: formData.resaleLinks.map(({ tempId, ...link }) => link),
+        resaleLinks: formData.resaleLinks.map(({ tempId: _tempId, ...link }) => link), // Prefixed tempId with _
       };
 
       await addArbitrageCoin(dataToSubmit);
       setSuccessMessage('Arbitrage coin added successfully!');
       setFormData(initialFormData); // Reset form
-    } catch (e: any) {
-      setError(e.message || 'Failed to add arbitrage coin. Please try again.');
+    } catch (e: unknown) {
+      if (e instanceof Error) {
+        setError(e.message || 'Failed to add arbitrage coin. Please try again.');
+      } else {
+        setError('An unexpected error occurred while adding the arbitrage coin.');
+      }
       console.error(e);
     } finally {
       setIsLoading(false);
@@ -120,7 +124,7 @@ export default function AddArbitrageCoinForm() {
         <input type="url" name="imageUrl" id="imageUrl" value={formData.imageUrl} onChange={handleChange}
                className="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm" />
       </div>
-      
+
       <div>
         <label htmlFor="notes" className="block text-sm font-medium text-gray-700">Admin Notes (Optional)</label>
         <textarea name="notes" id="notes" value={formData.notes} onChange={handleChange} rows={2}

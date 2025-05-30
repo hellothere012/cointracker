@@ -1,7 +1,7 @@
 'use client';
 
 import { useEffect } from 'react';
-import { useAuth, AppUser } from '../lib/authContext'; // Ensure AppUser is exported from authContext
+import { useAuth } from '../lib/authContext'; // AppUser removed from import
 import { useRouter } from 'next/navigation';
 import React from 'react';
 
@@ -25,7 +25,7 @@ const withAdminAuth = <P extends object>(WrappedComponent: React.ComponentType<P
     if (!currentUser || !currentUser.isAdmin) {
       // Render nothing or a redirect message while router effect takes place
       // This helps prevent flashing the protected content
-      return <p className="text-center text-xl font-semibold mt-20">Redirecting...</p>; 
+      return <p className="text-center text-xl font-semibold mt-20">Redirecting...</p>;
     }
 
     return <WrappedComponent {...props} />;

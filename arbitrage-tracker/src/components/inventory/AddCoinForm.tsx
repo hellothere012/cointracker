@@ -47,7 +47,7 @@ export default function AddCoinForm() {
     // This basic setup assumes it will connect or already has data.
     // A more robust error handling for the subscription itself might be needed here.
     // For now, errors during data processing are caught by the callback's error handling.
-    
+
     // Cleanup subscription on unmount
     return () => {
       unsubscribe();
@@ -70,7 +70,7 @@ export default function AddCoinForm() {
         weight = selectedCoin.weightG;
         weightUnit = 'g';
       }
-      
+
       setFormData(prev => ({
         ...prev,
         name: selectedCoin.name || prev.name,
@@ -89,7 +89,7 @@ export default function AddCoinForm() {
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>) => {
     const { name, value, type } = e.target;
-    
+
     let processedValue: string | number | undefined = value;
     if (type === 'number') {
       processedValue = value === '' ? undefined : parseFloat(value);
@@ -147,8 +147,12 @@ export default function AddCoinForm() {
       await addCoin(currentUser.uid, coinDataForFirestore);
       setSuccessMessage('Coin added successfully!');
       setFormData(initialFormData); // Reset form
-    } catch (e: any) {
-      setError(e.message || 'Failed to add coin. Please try again.');
+    } catch (e: unknown) {
+      if (e instanceof Error) {
+        setError(e.message || 'Failed to add coin. Please try again.');
+      } else {
+        setError('An unexpected error occurred while adding the coin.');
+      }
       console.error(e);
     } finally {
       setIsLoading(false);
@@ -160,7 +164,7 @@ export default function AddCoinForm() {
       <h3 className="text-xl font-semibold text-gray-700 mb-6">Add New Coin</h3>
       {error && <p className="text-red-500 text-sm bg-red-100 p-3 rounded-md">{error}</p>}
       {successMessage && <p className="text-green-500 text-sm bg-green-100 p-3 rounded-md">{successMessage}</p>}
-      
+
       {/* Preloaded Coin Selector */}
       <div className="col-span-1 md:col-span-2">
         <label htmlFor="preloadedCoin" className="block text-sm font-medium text-gray-700">

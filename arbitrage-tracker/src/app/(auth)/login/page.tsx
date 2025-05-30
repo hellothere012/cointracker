@@ -19,8 +19,12 @@ export default function LoginPage() {
     try {
       await signInWithEmailAndPassword(auth, email, password);
       router.push('/dashboard'); // Redirect to dashboard after successful login
-    } catch (e: any) {
-      setError(e.message);
+    } catch (e: unknown) {
+      if (e instanceof Error) {
+        setError(e.message);
+      } else {
+        setError('An unexpected error occurred during login.');
+      }
     }
   };
 
@@ -29,8 +33,12 @@ export default function LoginPage() {
     try {
       await signOut(auth);
       router.push('/'); // Redirect to home page after logout
-    } catch (e: any) {
-      setError(e.message);
+    } catch (e: unknown) {
+      if (e instanceof Error) {
+        setError(e.message);
+      } else {
+        setError('An unexpected error occurred during logout.');
+      }
     }
   };
 

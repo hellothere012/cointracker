@@ -4,11 +4,11 @@ import React, { useMemo } from 'react'; // Added useMemo
 import { Coin } from '../../types/inventory';
 import { deleteCoin } from '../../lib/firestoreService';
 import { Timestamp } from 'firebase/firestore';
-import { 
-  SpotPrices, 
-  calculateMeltValue, 
-  calculatePremiumPaidPercent, 
-  calculateProfitMarginPercent 
+import {
+  SpotPrices,
+  calculateMeltValue,
+  calculatePremiumPaidPercent,
+  calculateProfitMarginPercent
 } from '../../lib/calculations'; // Import calculation functions and SpotPrices type
 
 interface CoinRowProps {
@@ -43,7 +43,7 @@ const formatPercent = (value: number | null | undefined, placeholder: string = '
 
 
 export default function CoinRow({ coin, onEdit, spotPrices, spotPricesLoading }: CoinRowProps) {
-  
+
   const calculatedValues = useMemo(() => {
     if (spotPricesLoading || !spotPrices) {
       return {
@@ -84,7 +84,7 @@ export default function CoinRow({ coin, onEdit, spotPrices, spotPricesLoading }:
   } else if (calculatedValues.profitabilityStatus === 'Loss') {
     rowClassName += " bg-yellow-100";
   }
-  
+
   const handleDelete = async () => {
     if (!coin.id) {
       console.error('Coin ID is missing, cannot delete.');

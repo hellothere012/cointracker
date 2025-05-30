@@ -29,7 +29,7 @@ export default function EditCoinModal({ coin, isOpen, onClose, onSuccess }: Edit
     setSuccessMessage(null); // Clear success message
     if (coin) {
       // Convert purchaseDate Timestamp to YYYY-MM-DD string for the form
-      const purchaseDateString = coin.purchaseDate instanceof Timestamp 
+      const purchaseDateString = coin.purchaseDate instanceof Timestamp
         ? new Date(coin.purchaseDate.seconds * 1000).toISOString().split('T')[0]
         : (coin.purchaseDate ? coin.purchaseDate.toString() : new Date().toISOString().split('T')[0]); // Fallback if it's already a string or other format
 
@@ -73,7 +73,7 @@ export default function EditCoinModal({ coin, isOpen, onClose, onSuccess }: Edit
       setError('No coin selected for editing or coin ID is missing.');
       return;
     }
-    
+
     // Basic Validations (similar to AddCoinForm, can be extracted to a utility)
     if (formData.name && formData.name.trim() === '') {
         setError('Coin name is required.');
@@ -106,7 +106,7 @@ export default function EditCoinModal({ coin, isOpen, onClose, onSuccess }: Edit
       if (formData.purchaseDate) {
         updateData.purchaseDate = Timestamp.fromDate(new Date(formData.purchaseDate));
       }
-      
+
       // Ensure only defined fields are passed to updateCoin to avoid overwriting with undefined
       const definedUpdateData = Object.fromEntries(
         Object.entries(updateData).filter(([_, v]) => v !== undefined)
@@ -119,7 +119,7 @@ export default function EditCoinModal({ coin, isOpen, onClose, onSuccess }: Edit
       // For now, keeping immediate close after onSuccess call. User will see changes in table.
       // To show message before closing:
       // setTimeout(() => {
-      //   onClose(); 
+      //   onClose();
       //   setSuccessMessage(null); // Clear message after modal is closed
       // }, 1500);
       // But for now, the parent page (InventoryPage) can show a global success message if needed via onSuccess prop.
@@ -131,8 +131,12 @@ export default function EditCoinModal({ coin, isOpen, onClose, onSuccess }: Edit
       // The current `onSuccess` in `InventoryPage` just refreshes a key, doesn't show a message.
       // So, this modal should show its own success.
       // Let's keep it simple: set success message, and it will be visible until next form interaction or modal close.
-    } catch (e: any) {
-      setError(e.message || 'Failed to update coin. Please try again.');
+    } catch (e: unknown) {
+      if (e instanceof Error) {
+        setError(e.message || 'Failed to update coin. Please try again.');
+      } else {
+        setError('An unexpected error occurred while updating the coin.');
+      }
       console.error(e);
       setSuccessMessage(null); // Clear success message on error
     } finally {
