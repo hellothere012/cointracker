@@ -16,6 +16,7 @@ import {
   calculatePremiumPaidPercent,
   calculateProfitMarginPercent
 } from '../../lib/calculations'; // Import calculation functions
+import { Timestamp } from 'firebase/firestore'; // Import Timestamp
 
 // Sample data for preloading
 const samplePreloadedCoins: PreloadedCoinData[] = [
@@ -171,7 +172,7 @@ function InventoryPage() {
     setRefreshKey(prevKey => prevKey + 1);
   };
 
-  const formatDateForCSV = (timestamp: any): string => {
+  const formatDateForCSV = (timestamp: Timestamp | Date | undefined | null): string => {
     if (!timestamp) return '';
     if (timestamp instanceof Date) {
       return timestamp.toISOString().split('T')[0];
@@ -182,7 +183,7 @@ function InventoryPage() {
     return ''; // Fallback for unexpected format
   };
 
-  const escapeCSVField = (field: any): string => {
+  const escapeCSVField = (field: unknown): string => {
     if (field === null || field === undefined) return ''; // Return empty string for null/undefined
     const stringField = String(field);
     // Basic CSV escaping: if field contains comma, newline or double quote, wrap in double quotes
