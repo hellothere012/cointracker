@@ -263,19 +263,40 @@ export const updateCoin = async (
     throw new Error('Coin ID is required to update a coin.');
   }
   const coinDocRef = doc(db, 'coins', coinId);
-  const updateData: any = {
+  // Use a more specific type if possible, combining Partial<Coin> and FieldValue for timestamps
+  // For a general approach to avoid 'any' here:
+  const updatePayload: Record<string, unknown> = {
     ...coinData,
-    updatedAt: serverTimestamp() as Timestamp,
+    updatedAt: serverTimestamp(), // serverTimestamp() is already a FieldValue, no need to cast to Timestamp
   };
 
-  // If purchaseDate is being updated and is a string, convert it
-  if (coinData.purchaseDate && !(coinData.purchaseDate instanceof Timestamp)) {
-    updateData.purchaseDate = Timestamp.fromDate(new Date(coinData.purchaseDate as any));
+  // The `coinData.purchaseDate` should ideally be a Timestamp if it's part of the `Coin` type.
+  // If it can also be a string date passed to this function, the `Coin` type or this function's param type should reflect that.
+  // Assuming `coinData.purchaseDate` is `Timestamp | undefined` as per `Coin` type:
+  // The following block might be for cases where `coinData` comes from a less strictly typed source.
+  if (coinData.purchaseDate) {
+    if (!(coinData.purchaseDate instanceof Timestamp)) {
+      // This case implies coinData.purchaseDate is not conforming to Coin['purchaseDate'] type here.
+      // This could be an old string date from a form that wasn't converted.
+      console.warn("updateCoin received a purchaseDate that is not a Firestore Timestamp. Attempting conversion.");
+      try {
+        // Attempt conversion from string or Date object
+        updatePayload.purchaseDate = Timestamp.fromDate(new Date(coinData.purchaseDate as string | Date));
+      } catch (dateError) {
+        console.error("Failed to convert purchaseDate to Timestamp in updateCoin:", dateError);
+        // Decide how to handle: throw error, or remove from payload?
+        // For now, let's remove it to prevent a bad update.
+        delete updatePayload.purchaseDate;
+      }
+    } else {
+      // It's already a Timestamp, ensure it's in the payload if it was in coinData.
+      updatePayload.purchaseDate = coinData.purchaseDate;
+    }
   }
 
 
   try {
-    await updateDoc(coinDocRef, updateData);
+    await updateDoc(coinDocRef, updatePayload);
   } catch (error) {
     console.error('Error updating coin in Firestore: ', error);
     throw error;
