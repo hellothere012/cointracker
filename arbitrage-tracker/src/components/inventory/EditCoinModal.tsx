@@ -22,8 +22,11 @@ export default function EditCoinModal({ coin, isOpen, onClose, onSuccess }: Edit
   const [formData, setFormData] = useState<Partial<EditCoinFormData>>({});
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const [successMessage, setSuccessMessage] = useState<string | null>(null); // Added success message state
 
   useEffect(() => {
+    setError(null); // Clear error when coin changes or modal opens/closes
+    setSuccessMessage(null); // Clear success message
     if (coin) {
       // Convert purchaseDate Timestamp to YYYY-MM-DD string for the form
       const purchaseDateString = coin.purchaseDate instanceof Timestamp 
@@ -95,6 +98,7 @@ export default function EditCoinModal({ coin, isOpen, onClose, onSuccess }: Edit
 
     setIsLoading(true);
     setError(null);
+    setSuccessMessage(null); // Clear previous success messages
 
     try {
       const updateData = { ...formData };
@@ -108,13 +112,29 @@ export default function EditCoinModal({ coin, isOpen, onClose, onSuccess }: Edit
         Object.entries(updateData).filter(([_, v]) => v !== undefined)
       );
 
-
       await updateCoin(coin.id, definedUpdateData as Partial<Omit<Coin, 'id' | 'userId' | 'createdAt' | 'updatedAt'>>);
-      onSuccess(); // Call success callback (e.g., to refresh data or show message)
-      onClose(); // Close modal
+      setSuccessMessage('Coin updated successfully!'); // Set success message
+      onSuccess(); // Call success callback
+      // Optionally delay onClose to let user see success message, or keep immediate close
+      // For now, keeping immediate close after onSuccess call. User will see changes in table.
+      // To show message before closing:
+      // setTimeout(() => {
+      //   onClose(); 
+      //   setSuccessMessage(null); // Clear message after modal is closed
+      // }, 1500);
+      // But for now, the parent page (InventoryPage) can show a global success message if needed via onSuccess prop.
+      // Let's simplify: close immediately. The success is implicit by data update.
+      // Reconsidering: a brief message in modal is better UX.
+      // Let's set success, then parent can close or it can auto-close after a delay.
+      // For now, the modal will show success, and parent's onSuccess can handle closing.
+      // No, `onSuccess` should be for data refresh. Modal itself should show its own success.
+      // The current `onSuccess` in `InventoryPage` just refreshes a key, doesn't show a message.
+      // So, this modal should show its own success.
+      // Let's keep it simple: set success message, and it will be visible until next form interaction or modal close.
     } catch (e: any) {
       setError(e.message || 'Failed to update coin. Please try again.');
       console.error(e);
+      setSuccessMessage(null); // Clear success message on error
     } finally {
       setIsLoading(false);
     }
@@ -128,6 +148,7 @@ export default function EditCoinModal({ coin, isOpen, onClose, onSuccess }: Edit
         <div className="mt-3 text-center">
           <h3 className="text-lg leading-6 font-medium text-gray-900 mb-4">Edit Coin: {coin.name}</h3>
           {error && <p className="text-red-500 text-sm bg-red-100 p-3 rounded-md mb-4">{error}</p>}
+          {successMessage && <p className="text-green-500 text-sm bg-green-100 p-3 rounded-md mb-4">{successMessage}</p>}
           <form onSubmit={handleSubmit} className="space-y-4 text-left">
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
               <div>

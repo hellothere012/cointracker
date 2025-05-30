@@ -18,11 +18,13 @@ import {
 import { app } from './firebaseConfig'; // Your Firebase app initialization
 import { Coin } from '../types/inventory'; // Coin type interface
 import { PreloadedCoinData } from '../types/preloadedCoin'; // Import PreloadedCoinData
+import { ArbitrageCoin } from '../types/arbitrage'; // Import ArbitrageCoin
 
 // Initialize Firestore
 const db = getFirestore(app);
 const coinsCollectionRef = collection(db, 'coins');
-const preloadedCoinsCollectionRef = collection(db, 'preloadedCoins'); // New collection ref
+const preloadedCoinsCollectionRef = collection(db, 'preloadedCoins');
+const arbitrageCoinsCollectionRef = collection(db, 'arbitrageCoins'); // New collection for arbitrage coins
 
 /**
  * Adds a new coin to the 'coins' collection in Firestore.
@@ -130,6 +132,65 @@ export const batchAddPreloadedCoins = async (coinsData: PreloadedCoinData[]): Pr
   } else {
     console.log('No new preloaded coins to add.');
   }
+};
+
+/**
+ * Adds a new arbitrage coin entry to Firestore.
+ * @param data - The arbitrage coin data (excluding id and publishedAt).
+ * @returns A Promise that resolves with the DocumentReference of the newly added document.
+ */
+export const addArbitrageCoin = async (
+  data: Omit<ArbitrageCoin, 'id' | 'publishedAt'>
+): Promise<DocumentReference> => {
+  try {
+    const newArbitrageCoinData = {
+      ...data,
+      publishedAt: serverTimestamp() as Timestamp,
+    };
+    const docRef = await addDoc(arbitrageCoinsCollectionRef, newArbitrageCoinData);
+    return docRef;
+  } catch (error) {
+    console.error('Error adding arbitrage coin to Firestore: ', error);
+    throw error;
+  }
+};
+
+/**
+ * Fetches arbitrage coins in real-time, ordered by publishedAt descending.
+ * @param onSnapshotCallback - Callback function to be called with the array of ArbitrageCoin.
+ * @returns An unsubscribe function to detach the listener.
+ */
+export const getArbitrageCoins = (
+  onSnapshotCallback: (coins: ArbitrageCoin[]) => void
+): Unsubscribe => {
+  const q = query(arbitrageCoinsCollectionRef, orderBy('publishedAt', 'desc'));
+
+  const unsubscribe = onSnapshot(
+    q,
+    (querySnapshot) => {
+      const arbitrageCoins: ArbitrageCoin[] = [];
+      querySnapshot.forEach((doc) => {
+        const data = doc.data();
+        arbitrageCoins.push({
+          id: doc.id,
+          name: data.name,
+          metalType: data.metalType,
+          description: data.description,
+          resaleLinks: data.resaleLinks || [], // Ensure resaleLinks is an array
+          imageUrl: data.imageUrl,
+          notes: data.notes,
+          publishedAt: data.publishedAt, // Already a Timestamp
+        } as ArbitrageCoin);
+      });
+      onSnapshotCallback(arbitrageCoins);
+    },
+    (error) => {
+      console.error('Error fetching arbitrage coins from Firestore: ', error);
+      onSnapshotCallback([]); // Optionally pass an error or empty array
+    }
+  );
+
+  return unsubscribe;
 };
 
 /**
